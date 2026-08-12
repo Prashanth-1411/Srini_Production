@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+<ul class="nav nav-pills gap-1 mb-3">
+  <li class="nav-item"><a class="nav-link {% if not cat %}active{% endif %}" href="{% url 'documents:list' %}">All <span class="badge bg-secondary ms-1">{{ cat_counts.ALL }}</span></a></li>
+  <li class="nav-item"><a class="nav-link {% if cat == 'INWARD' %}active{% endif %}" href="{% url 'documents:list' %}?cat=INWARD">Inward <span class="badge bg-secondary ms-1">{{ cat_counts.INWARD }}</span></a></li>
+  <li class="nav-item"><a class="nav-link {% if cat == 'OUTWARD' %}active{% endif %}" href="{% url 'documents:list' %}?cat=OUTWARD">Outward <span class="badge bg-secondary ms-1">{{ cat_counts.OUTWARD }}</span></a></li>
+  <li class="nav-item"><a class="nav-link {% if cat == 'pdf' %}active{% endif %}" href="{% url 'documents:list' %}?cat=pdf">PDF <span class="badge bg-secondary ms-1">{{ cat_counts.pdf }}</span></a></li>
+  <li class="nav-item"><a class="nav-link {% if cat == 'excel' %}active{% endif %}" href="{% url 'documents:list' %}?cat=excel">Excel <span class="badge bg-secondary ms-1">{{ cat_counts.excel }}</span></a></li>
+</ul>
 <form method="get" class="row g-2 mb-3">
   <div class="col-auto flex-grow-1">
     <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by title, description or filename...">

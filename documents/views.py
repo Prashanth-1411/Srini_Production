@@ -20,6 +20,8 @@ def index(request):
         "page_title": "Documents",
         "counts": [
             {"label": "All Documents", "count": Document.objects.count(), "url": "documents:list", "icon": "bi-folder2-open"},
+            {"label": "Inward / Goods Received", "count": Document.objects.filter(category=Document.CATEGORY_INWARD).count(), "url": "documents:list", "icon": "bi-box-arrow-in-down"},
+            {"label": "Outward / Goods Dispatched", "count": Document.objects.filter(category=Document.CATEGORY_OUTWARD).count(), "url": "documents:list", "icon": "bi-box-arrow-up-right"},
             {"label": "PDF Documents", "count": Document.objects.filter(file_ext=".pdf").count(), "url": "documents:list", "icon": "bi-file-earmark-pdf"},
             {"label": "Excel Documents", "count": Document.objects.filter(file_ext__in=[".xlsx", ".xls"]).count(), "url": "documents:list", "icon": "bi-file-earmark-excel"},
         ],
@@ -30,9 +32,12 @@ def index(request):
 @login_required
 def document_list(request):
     q = request.GET.get("q", "").strip()
+    cat = request.GET.get("cat", "").strip()
     qs = Document.objects.select_related("uploaded_by").all()
     if q:
         qs = qs.filter(Q(title__icontains=q) | Q(description__icontains=q) | Q(file__icontains=q))
+    if cat:
+        qs = qs.filter(category=cat)
     paginator = Paginator(qs, 20)
     page = paginator.get_page(request.GET.get("page"))
     rows = [
@@ -65,6 +70,14 @@ def document_list(request):
             "pagination": True,
             "page_obj": page,
             "q": q,
+            "cat": cat,
+            "cat_counts": {
+                "ALL": Document.objects.count(),
+                Document.CATEGORY_INWARD: Document.objects.filter(category=Document.CATEGORY_INWARD).count(),
+                Document.CATEGORY_OUTWARD: Document.objects.filter(category=Document.CATEGORY_OUTWARD).count(),
+                "pdf": Document.objects.filter(file_ext=".pdf").count(),
+                "excel": Document.objects.filter(file_ext__in=[".xlsx", ".xls"]).count(),
+            },
         },
     )
 

@@ -1,10 +1,11 @@
 from datetime import date
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.shortcuts import render
 
-from dispatch.models import Dispatch
-from materials.models import HeatNumber, MaterialLot
+from dispatch.models import Dispatch, DispatchItem
+from materials.models import HeatNumber, MaterialLot, MaterialTransaction
 from production.models import ProductionLot
 from quality.models import QCInspection
 
@@ -41,8 +42,29 @@ def get_role(request):
 def dashboard(request):
     role = get_role(request)
     today = date.today()
+    month_lots = MaterialLot.objects.filter(received_date__year=today.year, received_date__month=today.month)
+    inward_qty = month_lots.aggregate(s=Sum("quantity_received"))["s"] or 0
+    outward_qty = (
+        DispatchItem.objects.filter(
+            dispatch__dispatch_date__year=today.year,
+            dispatch__dispatch_date__month=today.month,
+            dispatch__status=Dispatch.STATUS_DISPATCHED,
+        ).aggregate(s=Sum("quantity"))["s"]
+        or 0
+    )
     stats = {
-        "material_received": MaterialLot.objects.filter(received_date__year=today.year, received_date__month=today.month).count(),
+        "material_received": month_lots.count(),
+        "inward_qty": inward_qty,
+        "outward_qty": outward_qty,
+        "consumed_qty": (
+            MaterialTransaction.objects.filter(
+                txn_type=MaterialTransaction.TXN_OUT,
+                txn_date__year=today.year,
+                txn_date__month=today.month,
+            ).aggregate(s=Sum("quantity"))["s"]
+            or 0
+        ),
+        "stock_qty": MaterialLot.objects.aggregate(s=Sum("quantity_remaining"))["s"] or 0,
         "heat_numbers": HeatNumber.objects.count(),
         "stock_lots": MaterialLot.objects.filter(quantity_remaining__gt=0).count(),
         "production_today": ProductionLot.objects.filter(start_date=today).count(),

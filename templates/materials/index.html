@@ -1,6 +1,41 @@
 ﻿{% extends "base.html" %}
 {% block page_title %}Materials{% endblock %}
 {% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'materials:lot_list' %}" class="text-decoration-none">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-muted small"><i class="bi bi-box-arrow-in-down me-1"></i>Inward (this month)</div>
+          <div class="fs-4 fw-bold">{{ inward_qty }} kg</div>
+          <div class="text-muted small">Material received from suppliers</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'materials:txn_list' %}" class="text-decoration-none">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-muted small"><i class="bi bi-arrow-right me-1"></i>Outward / Consumed (this month)</div>
+          <div class="fs-4 fw-bold">{{ outward_qty }} kg</div>
+          <div class="text-muted small">Material consumed into production</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <a href="{% url 'materials:stock' %}" class="text-decoration-none">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-muted small"><i class="bi bi-clipboard-data me-1"></i>Current Stock Balance</div>
+          <div class="fs-4 fw-bold">{{ stock_qty }} kg</div>
+          <div class="text-muted small">Remaining across all lots</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
 <div class="row g-3">
   {% for item in counts %}
   <div class="col-md-6 col-xl-4">

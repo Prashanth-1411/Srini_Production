@@ -1,11 +1,14 @@
 ﻿from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 
 from audit.services import log_action
 
 from .forms import BarForm, HeatNumberForm, MaterialLotForm, MaterialTransactionForm
 from .models import Bar, HeatNumber, MaterialLot, MaterialTransaction
+
+from datetime import date
 
 
 def _status_badge(status):
@@ -27,8 +30,20 @@ def _actions(edit_url, del_url=None):
 
 @login_required
 def index(request):
+    today = date.today()
+    month_lots = MaterialLot.objects.filter(received_date__year=today.year, received_date__month=today.month)
     context = {
         "page_title": "Materials",
+        "inward_qty": month_lots.aggregate(s=Sum("quantity_received"))["s"] or 0,
+        "outward_qty": (
+            MaterialTransaction.objects.filter(
+                txn_type=MaterialTransaction.TXN_OUT,
+                txn_date__year=today.year,
+                txn_date__month=today.month,
+            ).aggregate(s=Sum("quantity"))["s"]
+            or 0
+        ),
+        "stock_qty": MaterialLot.objects.aggregate(s=Sum("quantity_remaining"))["s"] or 0,
         "counts": [
             {"label": "Heat Numbers", "count": HeatNumber.objects.count(), "url": "materials:heat_list", "icon": "bi-fire"},
             {"label": "Material Lots", "count": MaterialLot.objects.count(), "url": "materials:lot_list", "icon": "bi-box-seam"},

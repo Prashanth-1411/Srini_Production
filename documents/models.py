@@ -7,6 +7,8 @@ from .validators import validate_document_file
 
 
 class Document(models.Model):
+    CATEGORY_INWARD = "INWARD"
+    CATEGORY_OUTWARD = "OUTWARD"
     CATEGORY_MATERIAL_CERT = "MATERIAL_CERT"
     CATEGORY_TEST_REPORT = "TEST_REPORT"
     CATEGORY_HEAT_TREATMENT = "HEAT_TREATMENT"
@@ -15,6 +17,8 @@ class Document(models.Model):
     CATEGORY_OTHER = "OTHER"
 
     CATEGORY_CHOICES = [
+        (CATEGORY_INWARD, "Inward / Goods Received"),
+        (CATEGORY_OUTWARD, "Outward / Goods Dispatched"),
         (CATEGORY_MATERIAL_CERT, "Material Certificate (MTC)"),
         (CATEGORY_TEST_REPORT, "Test Report"),
         (CATEGORY_HEAT_TREATMENT, "Heat Treatment Chart"),
