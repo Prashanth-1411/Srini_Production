@@ -1,13 +1,20 @@
 import os
+import shutil
 import tempfile
 
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from .models import Document
 from .preview import excel_to_html
 from .validators import validate_document_file
+
+TEMP_MEDIA = tempfile.mkdtemp(prefix="documents_test_media_")
+
+
+def tearDownModule():
+    shutil.rmtree(TEMP_MEDIA, ignore_errors=True)
 
 
 class ValidatorTests(TestCase):
@@ -34,6 +41,7 @@ class ValidatorTests(TestCase):
         validate_document_file(file)
 
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA)
 class DocumentModelTests(TestCase):
     def test_save_records_size_and_ext(self):
         doc = Document.objects.create(

@@ -10,7 +10,7 @@ env/
 db.sqlite3
 staticfiles/
 logs/
-media/uploads/
+media/
 
 # Secrets & environment
 .env
