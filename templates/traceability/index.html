@@ -1,0 +1,155 @@
+﻿{% extends "base.html" %}
+{% block page_title %}Traceability Center{% endblock %}
+{% block content %}
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-2 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label">Search</label>
+        <input type="text" name="q" value="{{ query }}" class="form-control"
+               placeholder="Heat number (e.g. H-2024-001)">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Mode</label>
+        <select name="mode" class="form-control">
+          <option value="forward" {% if mode == "forward" %}selected{% endif %}>
+            Forward — Heat to Finished Part
+          </option>
+          <option value="backward" {% if mode == "backward" %}selected{% endif %}>
+            Backward — Dispatch/Lot to Heat
+          </option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary w-100"><i class="bi bi-search me-1"></i>Trace</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% if query is not None %}
+  {% if result is None or result|length == 0 %}
+    <div class="alert alert-light border text-center py-5">
+      <i class="bi bi-search text-muted" style="font-size:3rem;"></i>
+      <h5 class="mt-3">No matching records found</h5>
+      <p class="text-muted mb-0">Try a different heat number, production lot number, or dispatch number.</p>
+    </div>
+  {% else %}
+    {% if mode == "forward" %}
+      {% for item in result %}
+      <div class="card mb-3">
+        <div class="card-header">
+          <i class="bi bi-fire me-1"></i>
+          Heat <strong>{{ item.heat.heat_no }}</strong>
+          <span class="text-muted small"> &middot; {{ item.heat.grade }} &middot; {{ item.heat.supplier.name }} &middot; MTC: {{ item.heat.mill_cert_no|default:"-" }}</span>
+        </div>
+        <div class="card-body">
+          <h6 class="text-muted">Material Lots</h6>
+          <table class="table table-sm table-bordered">
+            <thead class="table-light"><tr><th>Lot</th><th>Material</th><th>Dia</th><th>Received</th><th>Remaining</th></tr></thead>
+            <tbody>
+              {% for l in item.lots %}
+              <tr>
+                <td><a href="{% url 'materials:lot_detail' l.pk %}">{{ l.lot_no }}</a></td>
+                <td>{{ l.product.name }}</td><td>{{ l.bar_dia|default:"-" }}</td>
+                <td>{{ l.quantity_received }} {{ l.unit }}</td><td>{{ l.quantity_remaining }} {{ l.unit }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="5" class="text-muted">No lots.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+
+          <h6 class="text-muted mt-3">Production Lots</h6>
+          <table class="table table-sm table-bordered">
+            <thead class="table-light"><tr><th>Prod Lot</th><th>Job</th><th>Product</th><th>Customer</th><th>OK</th><th>Status</th></tr></thead>
+            <tbody>
+              {% for p in item.production_lots %}
+              <tr>
+                <td><a href="{% url 'production:lot_detail' p.pk %}">{{ p.lot_no }}</a></td>
+                <td>{{ p.job.job_no }}</td>
+                <td>{{ p.job.product.name }}</td>
+                <td>{{ p.job.customer.name }}</td>
+                <td>{{ p.qty_ok }}</td>
+                <td>{{ p.get_status_display }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="6" class="text-muted">No production lots.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+
+          <h6 class="text-muted mt-3">Dispatch</h6>
+          <table class="table table-sm table-bordered">
+            <thead class="table-light"><tr><th>Dispatch No</th><th>Customer</th><th>Invoice</th><th>Date</th><th>Prod Lot</th><th>Qty</th></tr></thead>
+            <tbody>
+              {% for d in item.dispatch_items %}
+              <tr>
+                <td>{{ d.dispatch.dispatch_no }}</td>
+                <td>{{ d.dispatch.customer.name }}</td>
+                <td>{{ d.dispatch.invoice_no|default:"-" }}</td>
+                <td>{{ d.dispatch.dispatch_date }}</td>
+                <td>{{ d.production_lot.lot_no }}</td>
+                <td>{{ d.quantity }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="6" class="text-muted">Not dispatched.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-link-45deg me-1"></i>Backward Trace Results</div>
+        <div class="card-body">
+          <h6 class="text-muted">Production Lots</h6>
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr><th>Prod Lot</th><th>Product</th><th>Customer</th><th>Material Lot</th><th>Heat No</th><th>Grade</th><th>Supplier</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+              {% for p in result.production_lots %}
+              <tr>
+                <td><a href="{% url 'production:lot_detail' p.pk %}">{{ p.lot_no }}</a></td>
+                <td>{{ p.job.product.name }}</td>
+                <td>{{ p.job.customer.name }}</td>
+                <td><a href="{% url 'materials:lot_detail' p.material_lot_id %}">{{ p.material_lot.lot_no }}</a></td>
+                <td><a href="{% url 'materials:heat_detail' p.material_lot.heat_id %}">{{ p.material_lot.heat.heat_no }}</a></td>
+                <td>{{ p.material_lot.heat.grade }}</td>
+                <td>{{ p.material_lot.heat.supplier.name }}</td>
+                <td>{{ p.get_status_display }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="8" class="text-muted">No production lots.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+
+          <h6 class="text-muted mt-3">Dispatches</h6>
+          <table class="table table-sm table-bordered">
+            <thead class="table-light">
+              <tr><th>Dispatch No</th><th>Customer</th><th>Invoice</th><th>Date</th><th>Prod Lot</th><th>Heat No</th><th>Qty</th></tr>
+            </thead>
+            <tbody>
+              {% for d in result.dispatch_items %}
+              <tr>
+                <td>{{ d.dispatch.dispatch_no }}</td>
+                <td>{{ d.dispatch.customer.name }}</td>
+                <td>{{ d.dispatch.invoice_no|default:"-" }}</td>
+                <td>{{ d.dispatch.dispatch_date }}</td>
+                <td>{{ d.production_lot.lot_no }}</td>
+                <td>{{ d.production_lot.material_lot.heat.heat_no }}</td>
+                <td>{{ d.quantity }}</td>
+              </tr>
+              {% empty %}<tr><td colspan="7" class="text-muted">No dispatch records.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+{% else %}
+<div class="alert alert-light border text-center py-5">
+  <i class="bi bi-diagram-3 text-muted" style="font-size:3.5rem;"></i>
+  <h5 class="mt-3">Trace Material from Heat to Finished Part</h5>
+  <p class="text-muted mb-0">
+    Forward mode: enter a <strong>heat number</strong> to see every lot, production lot and dispatch it went to.<br>
+    Backward mode: enter a <strong>production lot or dispatch number</strong> to find its source heat.
+  </p>
+</div>
+{% endif %}
+{% endblock %}

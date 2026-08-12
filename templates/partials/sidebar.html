@@ -1,0 +1,43 @@
+<div class="st-nav-heading">Main</div>
+<a class="nav-link {% if request.resolver_match.view_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+  <i class="bi bi-speedometer2"></i> Dashboard
+</a>
+<a class="nav-link {% if request.resolver_match.namespace == 'traceability' %}active{% endif %}" href="{% url 'traceability:index' %}">
+  <i class="bi bi-link-45deg"></i> Traceability Center
+</a>
+
+<div class="st-nav-heading">Manufacturing</div>
+<a class="nav-link {% if request.resolver_match.namespace == 'materials' %}active{% endif %}" href="{% url 'materials:index' %}">
+  <i class="bi bi-box-seam"></i> Materials
+</a>
+<a class="nav-link {% if request.resolver_match.namespace == 'production' %}active{% endif %}" href="{% url 'production:index' %}">
+  <i class="bi bi-gear-wide-connected"></i> Production
+</a>
+<a class="nav-link {% if request.resolver_match.namespace == 'processes' %}active{% endif %}" href="{% url 'processes:index' %}">
+  <i class="bi bi-brush"></i> Grinding / Hard-facing
+</a>
+<a class="nav-link {% if request.resolver_match.namespace == 'heat_treatment' %}active{% endif %}" href="{% url 'heat_treatment:index' %}">
+  <i class="bi bi-fire"></i> Heat Treatment
+</a>
+<a class="nav-link {% if request.resolver_match.namespace == 'quality' %}active{% endif %}" href="{% url 'quality:index' %}">
+  <i class="bi bi-clipboard-check"></i> Quality Control
+</a>
+<a class="nav-link {% if request.resolver_match.namespace == 'dispatch' %}active{% endif %}" href="{% url 'dispatch:index' %}">
+  <i class="bi bi-truck"></i> Dispatch
+</a>
+
+<div class="st-nav-heading">Reference</div>
+<a class="nav-link {% if request.resolver_match.namespace == 'masters' %}active{% endif %}" href="{% url 'masters:index' %}">
+  <i class="bi bi-database"></i> Master Data
+</a>
+<a class="nav-link {% if request.resolver_match.namespace == 'reports' %}active{% endif %}" href="{% url 'reports:index' %}">
+  <i class="bi bi-bar-chart-line"></i> Reports
+</a>
+{% if user.is_staff %}
+<a class="nav-link" href="{% url 'audit:log_list' %}">
+  <i class="bi bi-journal-text"></i> Audit Log
+</a>
+<a class="nav-link" href="/admin/">
+  <i class="bi bi-gear"></i> Administration
+</a>
+{% endif %}

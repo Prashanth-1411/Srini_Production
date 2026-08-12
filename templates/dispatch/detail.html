@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block page_title %}Dispatch {{ dispatch.dispatch_no }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+  <div>
+    <span class="text-muted">Customer:</span> <strong>{{ dispatch.customer.name }}</strong>
+    <span class="text-muted ms-3">Invoice:</span> {{ dispatch.invoice_no|default:"-" }}
+    <span class="text-muted ms-3">Date:</span> {{ dispatch.dispatch_date }}
+    <span class="text-muted ms-3">Vehicle:</span> {{ dispatch.vehicle_no|default:"-" }}
+    <span class="text-muted ms-3">Status:</span> {{ dispatch.status }}
+  </div>
+  <a href="{% url 'dispatch:edit' dispatch.pk %}" class="btn btn-sm btn-outline-secondary">Edit Dispatch</a>
+</div>
+
+<div class="card">
+  <div class="card-header fw-semibold">Items</div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light">
+        <tr><th>Prod Lot</th><th>Product</th><th>Heat No</th><th>Grade</th><th>Qty</th></tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td><a href="{% url 'production:lot_detail' it.production_lot_id %}">{{ it.production_lot.lot_no }}</a></td>
+          <td>{{ it.production_lot.job.product.name }}</td>
+          <td>{{ it.production_lot.material_lot.heat.heat_no }}</td>
+          <td>{{ it.production_lot.material_lot.heat.grade }}</td>
+          <td>{{ it.quantity }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-4">No items.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

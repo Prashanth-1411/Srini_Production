@@ -1,0 +1,98 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Srinivasa Technology{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/icons/bootstrap-icons.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+{% if user.is_authenticated %}
+<nav class="st-sidebar" id="stSidebar">
+  <div class="st-brand d-flex align-items-center gap-2">
+    <div class="st-logo">ST</div>
+    <div>
+      <div class="st-title">Srinivasa Technology</div>
+      <div class="st-subtitle">Production &amp; Traceability</div>
+    </div>
+  </div>
+
+  <div class="st-nav">
+    {% include "partials/sidebar.html" %}
+  </div>
+</nav>
+
+<div class="st-main">
+  <div class="st-topbar d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-sm btn-outline-secondary d-lg-none" id="stSidebarToggle" type="button">
+        <i class="bi bi-list"></i>
+      </button>
+      <h1 class="st-page-title">{% block page_title %}{{ page_title|default:"Dashboard" }}{% endblock %}</h1>
+    </div>
+    <div class="dropdown">
+      <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+        <i class="bi bi-person-circle"></i>
+        <span>{{ user.get_username }}</span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><span class="dropdown-item-text small text-muted">
+          {% for g in user.groups.all %}<span class="badge bg-secondary me-1">{{ g.name }}</span>{% empty %}<span class="badge bg-secondary me-1">NO GROUP</span>{% endfor %}
+        </span></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="{% url 'accounts:password_change' %}"><i class="bi bi-key me-2"></i>Change Password</a></li>
+        {% if user.is_staff %}
+        <li><a class="dropdown-item" href="/admin/"><i class="bi bi-gear me-2"></i>Admin</a></li>
+        {% endif %}
+        <li><hr class="dropdown-divider"></li>
+        <li>
+          <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="dropdown-item"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="stFlash" class="st-content">
+    {% if messages %}
+      <div>
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+
+  <footer class="st-footer text-center">
+    Srinivasa Technology — Production Tracking &amp; Heat Traceability System &middot; Internal LAN Application
+  </footer>
+</div>
+{% else %}
+<div class="login-page">
+  {% if messages %}
+    <div class="position-fixed top-0 start-50 translate-middle-x mt-3" style="z-index: 2000;">
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% block auth_content %}{% endblock %}
+</div>
+{% endif %}
+
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/app.js' %}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

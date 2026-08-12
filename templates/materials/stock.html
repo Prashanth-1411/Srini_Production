@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block page_title %}Stock Balance{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+  <div class="col-sm-6 col-xl-3"><div class="card"><div class="card-body">
+    <div class="text-muted small">Lots In Stock</div><div class="fs-4 fw-bold">{{ total_lots }}</div>
+  </div></div></div>
+  <div class="col-sm-6 col-xl-3"><div class="card"><div class="card-body">
+    <div class="text-muted small">Total Balance</div><div class="fs-4 fw-bold">{{ total_balance }} kg</div>
+  </div></div></div>
+</div>
+{% include "partials/table.html" %}
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+  <a href="{{ back_url|default:'/reports/' }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back to Reports</a>
+  {% if export_kind %}
+  <div class="d-flex gap-2">
+    <a href="{% url 'reports:export_xlsx' export_kind %}" class="btn btn-sm btn-success"><i class="bi bi-file-earmark-excel me-1"></i>Export Excel</a>
+    <a href="{% url 'reports:export_pdf' export_kind %}" class="btn btn-sm btn-danger"><i class="bi bi-file-earmark-pdf me-1"></i>Export PDF</a>
+  </div>
+  {% endif %}
+</div>
+{% include "partials/table.html" %}
+{% endblock %}

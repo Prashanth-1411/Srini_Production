@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block page_title %}{{ form_title }}{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">{{ form_title }}</span>
+    {% if form_subtitle %}<span class="text-muted small">{{ form_subtitle }}</span>{% endif %}
+  </div>
+  <div class="card-body">
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{% for e in form.non_field_errors %}<div>{{ e }}</div>{% endfor %}</div>
+    {% endif %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span class="text-danger">*</span>{% endif %}</label>
+          {{ field }}
+          {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+        </div>
+      {% endfor %}
+
+      <hr>
+      <div class="d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Dispatch Items</h6>
+        <span class="text-muted small">QC-approved lots are marked as dispatched when saved.</span>
+      </div>
+      {{ formset.management_form }}
+      <table class="table table-sm align-middle mt-2">
+        <thead class="table-light">
+          <tr>
+            <th>Production Lot</th>
+            <th style="width:150px;">Quantity</th>
+            <th style="width:60px;">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item_form in formset %}
+          <tr class="dispatch-form-row">
+            <td>{{ item_form.id }}{{ item_form.production_lot }}</td>
+            <td>{{ item_form.quantity }}</td>
+            <td class="text-center">
+              {% if item_form.instance.pk %}{{ item_form.DELETE }}{% endif %}
+            </td>
+          </tr>
+          {% for err in item_form.non_field_errors %}<tr><td colspan="3" class="text-danger small">{{ err }}</td></tr>{% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Save</button>
+        <a href="{% url 'dispatch:list' %}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

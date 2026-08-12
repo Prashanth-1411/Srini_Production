@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block page_title %}{{ lot.lot_no }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+  <div>
+    <span class="text-muted">Heat:</span> <a href="{% url 'materials:heat_detail' lot.heat_id %}">{{ lot.heat.heat_no }}</a>
+    <span class="text-muted ms-3">Grade:</span> <strong>{{ lot.heat.grade }}</strong>
+    <span class="text-muted ms-3">Material:</span> <strong>{{ lot.product.name }}</strong>
+    <span class="text-muted ms-3">Supplier:</span> {{ lot.heat.supplier.name }}
+    <span class="text-muted ms-3">Dia:</span> {{ lot.bar_dia|default:"-" }} mm
+  </div>
+  <a href="{% url 'materials:lot_edit' lot.pk %}" class="btn btn-sm btn-outline-secondary">Edit Lot</a>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-sm-4"><div class="card"><div class="card-body">
+    <div class="text-muted small">Received</div><div class="fs-5 fw-bold">{{ lot.quantity_received }} {{ lot.unit }}</div>
+  </div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body">
+    <div class="text-muted small">Remaining</div><div class="fs-5 fw-bold {% if lot.quantity_remaining == 0 %}text-danger{% else %}text-success{% endif %}">{{ lot.quantity_remaining }} {{ lot.unit }}</div>
+  </div></div></div>
+  <div class="col-sm-4"><div class="card"><div class="card-body">
+    <div class="text-muted small">Status</div><div class="fs-5">{{ lot.get_status_display }}</div>
+  </div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">Bars</span>
+    <a href="{% url 'materials:bar_add' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Bar</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light"><tr><th>Bar No</th><th>Weight</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for b in bars %}
+        <tr><td>{{ b.bar_no }}</td><td>{{ b.weight }}</td><td>{{ b.get_status_display }}</td></tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-center text-muted py-4">No bars recorded.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span class="fw-semibold">Transactions</span>
+    <a href="{% url 'materials:txn_add' %}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Transaction</a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light"><tr><th>Type</th><th>Qty</th><th>Date</th><th>Reference</th><th>Remarks</th><th>By</th></tr></thead>
+      <tbody>
+        {% for t in txns %}
+        <tr>
+          <td><span class="badge bg-{% if t.txn_type == 'IN' %}success{% else %}warning{% endif %}">{{ t.get_txn_type_display }}</span></td>
+          <td>{{ t.quantity }} {{ lot.unit }}</td>
+          <td>{{ t.txn_date }}</td>
+          <td>{{ t.reference_type|default:"-" }}{% if t.reference_id %} #{{ t.reference_id }}{% endif %}</td>
+          <td>{{ t.remarks|default:"-" }}</td>
+          <td>{{ t.created_by.username|default:"-" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No transactions.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block page_title %}Production Lot {{ lot.lot_no }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+  <div>
+    <span class="text-muted">Job:</span> <a href="{% url 'production:job_detail' lot.job_id %}">{{ lot.job.job_no }}</a>
+    <span class="text-muted ms-3">Product:</span> <strong>{{ lot.job.product.name }}</strong>
+    <span class="text-muted ms-3">Customer:</span> {{ lot.job.customer.name }}
+    <span class="text-muted ms-3">Machine:</span> {{ lot.machine.name|default:"-" }}
+    <span class="text-muted ms-3">Operator:</span> {{ lot.operator|default:"-" }}
+  </div>
+  <a href="{% url 'production:lot_edit' lot.pk %}" class="btn btn-sm btn-outline-secondary">Edit Lot</a>
+</div>
+
+<div class="alert alert-light border">
+  <strong>Traceability:</strong> Material lot
+  <a href="{% url 'materials:lot_detail' lot.material_lot_id %}">{{ lot.material_lot.lot_no }}</a>
+  &middot; Heat number
+  <a href="{% url 'materials:heat_detail' lot.material_lot.heat_id %}">{{ lot.material_lot.heat.heat_no }}</a>
+  &middot; Grade <strong>{{ lot.material_lot.heat.grade }}</strong>
+  &middot; Supplier {{ lot.material_lot.heat.supplier.name }}
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-xl-2"><div class="card"><div class="card-body"><div class="text-muted small">Started</div><div class="fs-5 fw-bold">{{ lot.qty_started }}</div></div></div></div>
+  <div class="col-6 col-xl-2"><div class="card"><div class="card-body"><div class="text-muted small">OK</div><div class="fs-5 fw-bold text-success">{{ lot.qty_ok }}</div></div></div></div>
+  <div class="col-6 col-xl-2"><div class="card"><div class="card-body"><div class="text-muted small">Rework</div><div class="fs-5 fw-bold text-warning">{{ lot.qty_rework }}</div></div></div></div>
+  <div class="col-6 col-xl-2"><div class="card"><div class="card-body"><div class="text-muted small">Scrap</div><div class="fs-5 fw-bold text-danger">{{ lot.qty_scrap }}</div></div></div></div>
+  <div class="col-6 col-xl-2"><div class="card"><div class="card-body"><div class="text-muted small">Material Consumed</div><div class="fs-5 fw-bold">{{ lot.material_qty }} kg</div></div></div></div>
+  <div class="col-6 col-xl-2"><div class="card"><div class="card-body"><div class="text-muted small">Status</div><div class="fs-5 fw-bold">{{ lot.get_status_display }}</div></div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-header fw-semibold">Process History</div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light"><tr><th>Record</th><th>Type</th><th>Machine</th><th>Qty</th><th>Date</th><th>Remarks</th></tr></thead>
+      <tbody>
+        {% for p in processes %}
+        <tr>
+          <td>{{ p.record_no }}</td><td>{{ p.get_process_type_display }}</td>
+          <td>{{ p.machine.name|default:"-" }}</td><td>{{ p.quantity }}</td>
+          <td>{{ p.process_date|default:"-" }}</td><td>{{ p.remarks|default:"-" }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="6" class="text-center text-muted py-4">No process records.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if furnace %}
+<div class="card mt-3">
+  <div class="card-header fw-semibold">Heat Treatment Batch</div>
+  <div class="card-body">
+    <strong>{{ furnace.batch_no }}</strong> &middot; Furnace {{ furnace.furnace.name }}
+    &middot; Charge {{ furnace.charge_date|default:"-" }} / Discharge {{ furnace.discharge_date|default:"-" }}
+    &middot; Temp {{ furnace.temperature|default:"-" }} &middot; Status {{ furnace.get_status_display }}
+  </div>
+</div>
+{% endif %}
+
+<div class="card mt-3">
+  <div class="card-header fw-semibold">Quality Inspections</div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light"><tr><th>Inspection No</th><th>Date</th><th>Checked</th><th>Passed</th><th>Rework</th><th>Rejected</th><th>Result</th></tr></thead>
+      <tbody>
+        {% for i in inspections %}
+        <tr>
+          <td>{{ i.inspection_no }}</td><td>{{ i.inspection_date|default:"-" }}</td>
+          <td>{{ i.qty_checked }}</td><td>{{ i.qty_passed }}</td>
+          <td>{{ i.qty_rework }}</td><td>{{ i.qty_rejected }}</td>
+          <td><span class="badge bg-{% if i.result == 'PASS' %}success{% elif i.result == 'REJECT' %}danger{% else %}warning{% endif %}">{{ i.get_result_display }}</span></td>
+        </tr>
+        {% empty %}<tr><td colspan="7" class="text-center text-muted py-4">No inspections yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-header fw-semibold">Rework &amp; Scrap</div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light"><tr><th>Type</th><th>Qty</th><th>Reason</th><th>Date</th></tr></thead>
+      <tbody>
+        {% for r in reworks %}
+        <tr><td><span class="badge bg-warning text-dark">Rework</span></td><td>{{ r.quantity }}</td><td>{{ r.reason|default:"-" }}</td><td>{{ r.rework_date|default:"-" }}</td></tr>
+        {% endfor %}
+        {% for s in scraps %}
+        <tr><td><span class="badge bg-danger">Scrap</span></td><td>{{ s.quantity }}</td><td>{{ s.reason|default:"-" }}</td><td>{{ s.scrap_date|default:"-" }}</td></tr>
+        {% endfor %}
+        {% if not reworks and not scraps %}<tr><td colspan="4" class="text-center text-muted py-4">None recorded.</td></tr>{% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-header fw-semibold">Dispatch</div>
+  <div class="table-responsive">
+    <table class="table table-sm align-middle mb-0">
+      <thead class="table-light"><tr><th>Dispatch No</th><th>Customer</th><th>Invoice</th><th>Date</th><th>Qty</th></tr></thead>
+      <tbody>
+        {% for d in dispatch_items %}
+        <tr>
+          <td>{{ d.dispatch.dispatch_no }}</td><td>{{ d.dispatch.customer.name }}</td>
+          <td>{{ d.dispatch.invoice_no|default:"-" }}</td><td>{{ d.dispatch.dispatch_date }}</td>
+          <td>{{ d.quantity }}</td>
+        </tr>
+        {% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Not yet dispatched.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
