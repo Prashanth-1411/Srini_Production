@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block page_title %}{{ doc.title }}{% endblock %}
+{% block content %}
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+  <div>
+    <span class="badge bg-{% if doc.is_pdf %}danger{% else %}success{% endif %}">{{ doc.file_ext|upper }}</span>
+    <span class="badge bg-secondary">{{ doc.get_category_display }}</span>
+    <span class="text-muted ms-2">Uploaded {{ doc.created_at|date:"d-M-Y H:i" }} by {{ doc.uploaded_by.username|default:"-" }}</span>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'documents:download' doc.pk %}" class="btn btn-sm btn-primary"><i class="bi bi-download me-1"></i>Download</a>
+    <a href="{% url 'documents:edit' doc.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+    <a href="{% url 'documents:delete' doc.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    <a href="{% url 'documents:list' %}" class="btn btn-sm btn-outline-secondary">Back</a>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header"><span class="fw-semibold">Details</span></div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-sm-6"><div class="text-muted small">File</div><div>{{ doc.filename }}</div></div>
+      <div class="col-sm-6"><div class="text-muted small">Size</div><div>{{ doc.human_size }}</div></div>
+      <div class="col-sm-6"><div class="text-muted small">Category</div><div>{{ doc.get_category_display }}</div></div>
+      <div class="col-sm-6"><div class="text-muted small">Last updated</div><div>{{ doc.updated_at|date:"d-M-Y H:i" }}</div></div>
+      {% if doc.description %}<div class="col-12"><div class="text-muted small">Description</div><div>{{ doc.description|linebreaksbr }}</div></div>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="fw-semibold">Preview</span></div>
+  <div class="card-body">
+    {% if doc.is_pdf %}
+      <iframe src="{% url 'documents:view' doc.pk %}" class="w-100" style="height: 600px; border: 0;" title="{{ doc.title }}"></iframe>
+    {% elif doc.is_excel %}
+      {{ preview_html|safe }}
+    {% else %}
+      <div class="alert alert-info mb-0">Preview not available for this file type.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -19,6 +19,7 @@ urlpatterns = [
     path("quality/", include("quality.urls")),
     path("dispatch/", include("dispatch.urls")),
     path("audit/", include("audit.urls")),
+    path("documents/", include("documents.urls")),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block page_title %}Documents{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Supported formats</div>
+        <div class="fs-5 fw-bold">
+          <span class="badge bg-danger">PDF</span>
+          <span class="badge bg-success">Excel .xlsx / .xls</span>
+        </div>
+        <div class="text-muted small mt-1">Files are validated on upload and can be previewed in the app.</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="text-muted small">Auto preview</div>
+        <div class="fs-5 fw-bold">
+          <span class="badge bg-info text-dark">PDF</span> inline viewer
+          <span class="badge bg-info text-dark ms-2">Excel</span> rendered as table
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row g-3">
+  {% for item in counts %}
+  <div class="col-md-6 col-xl-4">
+    <a href="{% url item.url %}" class="text-decoration-none">
+      <div class="card h-100">
+        <div class="card-body d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="bi {{ item.icon }}"></i></div>
+            <div>
+              <div class="fw-semibold">{{ item.label }}</div>
+              <div class="text-muted small">{{ item.count }} record{{ item.count|pluralize }}</div>
+            </div>
+          </div>
+          <i class="bi bi-chevron-right text-muted"></i>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+<div class="text-end mt-3">
+  <a href="{% url 'documents:upload' %}" class="btn btn-primary"><i class="bi bi-upload me-1"></i>Upload Document</a>
+</div>
+{% endblock %}

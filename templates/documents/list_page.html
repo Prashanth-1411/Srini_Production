@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto flex-grow-1">
+    <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search by title, description or filename...">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-search me-1"></i>Search</button>
+    {% if q %}<a href="{% url 'documents:list' %}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+  </div>
+</form>
+{% include "partials/table.html" %}
+{% endblock %}
